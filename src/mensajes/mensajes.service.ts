@@ -7,22 +7,7 @@ import * as amqp from 'amqplib';
 export class MensajesService {
   async create(createMensajeDto: CreateMensajeDto) {
     try {
-      //luego conéctese al servidor RabbitMQ
-      //const connection = await amqp.connect("amqp://localhost:5672");
-      const coneccion = await amqp.connect('amqp://guest:guest@localhost:5672');
-      //A continuación, creamos un canal, que es donde reside la mayor parte de la API para hacer las cosas:
-      const canal = await coneccion.createChannel();
-      //Para enviar, debemos declarar una cola para enviar a; entonces podemos publicar un mensaje en la cola:
-      // const msg = 'Hello World!';
-      const mensaje = JSON.stringify(createMensajeDto);
-      const cola = 'cola_de_sms';
-      const mensajeBuffer = Buffer.from(mensaje);
-      await canal.assertQueue(cola);
-      await canal.sendToQueue(cola, mensajeBuffer);
-      console.log(' [x] Enviado %s', mensaje);
-      //Por último, cerramos el canal y la conexión y salimos:
-      await canal.close();
-      await coneccion.close();
+      enviar_sms_cola(createMensajeDto);
     } catch (ex) {
       console.error(ex);
     }
@@ -43,5 +28,27 @@ export class MensajesService {
 
   remove(id: number) {
     return `This action removes a #${id} mensaje`;
+  }
+}
+async function enviar_sms_cola(MensajeDto: CreateMensajeDto) {
+  try {
+    //luego conéctese al servidor RabbitMQ
+    //const connection = await amqp.connect("amqp://localhost:5672");
+    const coneccion = await amqp.connect('amqp://guest:guest@localhost:5672');
+    //A continuación, creamos un canal, que es donde reside la mayor parte de la API para hacer las cosas:
+    const canal = await coneccion.createChannel();
+    //Para enviar, debemos declarar una cola para enviar a; entonces podemos publicar un mensaje en la cola:
+    // const msg = 'Hello World!';
+    const mensaje = JSON.stringify(MensajeDto);
+    const cola = 'cola_de_sms';
+    const mensajeBuffer = Buffer.from(mensaje);
+    await canal.assertQueue(cola);
+    await canal.sendToQueue(cola, mensajeBuffer);
+    console.log(' [x] Enviado %s', mensaje);
+    //Por último, cerramos el canal y la conexión y salimos:
+    await canal.close();
+    await coneccion.close();
+  } catch (ex) {
+    console.error(ex);
   }
 }
