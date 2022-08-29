@@ -1,28 +1,28 @@
 import { Injectable } from '@nestjs/common';
-import { connect } from 'amqplib';
+// import { connect } from 'amqplib';
 import { CreateMensajeDto } from './dto/create-mensaje.dto';
 import { UpdateMensajeDto } from './dto/update-mensaje.dto';
-// import amqp from 'amqplib';
+import * as amqp from 'amqplib';
 @Injectable()
 export class MensajesService {
   async create(createMensajeDto: CreateMensajeDto) {
     try {
       //luego conéctese al servidor RabbitMQ
       //const connection = await amqp.connect("amqp://localhost:5672");
-      const connection = await connect('amqp://guest:guest@localhost:5672');
+      const coneccion = await amqp.connect('amqp://guest:guest@localhost:5672');
       //A continuación, creamos un canal, que es donde reside la mayor parte de la API para hacer las cosas:
-      const channel = await connection.createChannel();
+      const canal = await coneccion.createChannel();
       //Para enviar, debemos declarar una cola para enviar a; entonces podemos publicar un mensaje en la cola:
-      const msg = 'Hello World!';
-      const queue = 'mensaje';
-      const msgBuffer = Buffer.from(msg);
-
-      await channel.assertQueue(queue);
-      await channel.sendToQueue(queue, msgBuffer);
-      console.log(' [x] Enviado %s', msg);
+      // const msg = 'Hello World!';
+      const mensaje = JSON.stringify(createMensajeDto);
+      const cola = 'cola_de_sms';
+      const mensajeBuffer = Buffer.from(mensaje);
+      await canal.assertQueue(cola);
+      await canal.sendToQueue(cola, mensajeBuffer);
+      console.log(' [x] Enviado %s', mensaje);
       //Por último, cerramos el canal y la conexión y salimos:
-      await channel.close();
-      await connection.close();
+      await canal.close();
+      await coneccion.close();
     } catch (ex) {
       console.error(ex);
     }
