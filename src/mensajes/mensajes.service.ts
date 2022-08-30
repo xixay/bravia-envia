@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-// import { connect } from 'amqplib';
 import { CreateMensajeDto } from './dto/create-mensaje.dto';
 import { UpdateMensajeDto } from './dto/update-mensaje.dto';
 import * as amqp from 'amqplib';
@@ -12,7 +11,18 @@ export class MensajesService {
     } catch (ex) {
       console.error(ex);
     }
-    return createMensajeDto;
+    // return createMensajeDto;
+    const puerto = process.env.PORT;
+    console.log('#####PUERTO', puerto);
+    return {
+      NODE_ENV: process.env.NODE_ENV,
+      PORT: process.env.PORT,
+      DB_HOST: process.env.DB_HOST,
+      DB_USERNAME: process.env.DB_USERNAME,
+      DB_PASSWORD: process.env.DB_PASSWORD,
+      DB_DATABASE: process.env.DB_DATABASE,
+      DB_PORT: process.env.DB_PORT,
+    };
   }
 
   findAll() {
